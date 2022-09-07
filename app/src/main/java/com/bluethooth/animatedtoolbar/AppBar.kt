@@ -17,11 +17,32 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-
-
-@Preview
 @Composable
-fun DefaultAppBar( ) {
+fun MainToolBar(
+    searchBoxState: SearchBoxState,
+    ontextState : String,
+    onSearchTrigger : () -> Unit,
+    onSearchBoxClose : () -> Unit,
+    ontextChange : (String) -> Unit,
+    onSearchClick : () -> Unit
+){
+    when(searchBoxState){
+        SearchBoxState.Closed -> {
+            DefaultAppBar(onSearchTrigger)
+        }
+        SearchBoxState.Opened -> {
+            SearchAppBar(
+                onSearchBoxClose,
+                ontextChange,
+                onSearchClick,
+                ontextState
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultAppBar(onSearchTrigger : () -> Unit,) {
     TopAppBar(
         title = {
             Text(
@@ -31,7 +52,7 @@ fun DefaultAppBar( ) {
         actions = {
             IconButton(
                 onClick = {
-
+                    onSearchTrigger()
                 }
             ) {
                 Icon(
@@ -45,9 +66,14 @@ fun DefaultAppBar( ) {
 }
 
 
-@Preview
+
 @Composable
-fun SearchAppBar() {
+fun SearchAppBar(
+    onSearchBoxClose : () -> Unit,
+    ontextChange : (String) -> Unit,
+    onSearchClick : () -> Unit,
+    ontextState : String,
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -57,9 +83,9 @@ fun SearchAppBar() {
     ) {
         TextField(modifier = Modifier
             .fillMaxWidth(),
-            value = "",
+            value = ontextState.toString(),
             onValueChange = {
-
+                ontextChange(it)
             },
             placeholder = {
                 Text(
@@ -77,7 +103,9 @@ fun SearchAppBar() {
                 IconButton(
                     modifier = Modifier
                         .alpha(ContentAlpha.medium),
-                    onClick = {}
+                    onClick = {
+                        onSearchClick()
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -89,6 +117,11 @@ fun SearchAppBar() {
             trailingIcon = {
                 IconButton(
                     onClick = {
+                        if(ontextState.isEmpty()){
+                            onSearchBoxClose()
+                        }else{
+                            ontextChange("")
+                        }
 
                     }
                 ) {
